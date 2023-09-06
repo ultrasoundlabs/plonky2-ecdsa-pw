@@ -164,14 +164,30 @@ pub fn prove_ecdsa<F: RichField + Extendable<D>, C: GenericConfig<D, F = F>, con
 #[cfg(test)]
 mod tests {
     use anyhow::Result;
+    use num::bigint::BigUint;
+
     use plonky2::field::types::Sample;
     use plonky2::iop::witness::PartialWitness;
     use plonky2::plonk::circuit_data::CircuitConfig;
     use plonky2::plonk::config::{GenericConfig, PoseidonGoldilocksConfig};
+    use plonky2_field::types::PrimeField;
 
     use super::*;
     use crate::curve::curve_types::CurveScalar;
     use crate::curve::ecdsa::{sign_message, ECDSAPublicKey, ECDSASecretKey, ECDSASignature};
+
+    fn biguint_from_array(arr: [u64; 4]) -> BigUint {
+        BigUint::from_slice(&[
+            arr[0] as u32,
+            (arr[0] >> 32) as u32,
+            arr[1] as u32,
+            (arr[1] >> 32) as u32,
+            arr[2] as u32,
+            (arr[2] >> 32) as u32,
+            arr[3] as u32,
+            (arr[3] >> 32) as u32,
+        ])
+    }
 
     fn test_ecdsa_circuit_with_config(config: CircuitConfig) -> Result<()> {
         const D: usize = 2;
@@ -236,10 +252,10 @@ mod tests {
 
         let sig = sign_message(msg, sk);
 
-        println!("message digest: {:?}", msg);
-        println!("sk: {:?}", sk);
-        println!("pk: {:?}", pk);
-        println!("signature: {:?}", sig);
+        println!("message digest: {:?}", biguint_from_array(msg.0).to_str_radix(16));
+        println!("sk: {:?}", sk.0.to_canonical_biguint().to_str_radix(16));
+        println!("pk.x: {:?}, pk.y: {:?}", pk.0.x.to_canonical_biguint().to_str_radix(16), pk.0.y.to_canonical_biguint().to_str_radix(16));
+        println!("signature.r: {:?}, signature.s: {:?}", sig.r.to_canonical_biguint().to_str_radix(16), sig.s.to_canonical_biguint().to_str_radix(16));
 
         let ecdsa_proof = prove_ecdsa::<F, C, D>(msg, sig, pk).unwrap();
         println!("Num public inputs: {}", ecdsa_proof.2.num_public_inputs);
