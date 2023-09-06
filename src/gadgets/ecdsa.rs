@@ -1,15 +1,19 @@
 #![allow(incomplete_features)]
-#![feature(generic_const_exprs)]
+// #![feature(generic_const_exprs)]
 
 use anyhow::Result;
 use core::marker::PhantomData;
-use log::{info, Level, LevelFilter};
-use clap::Parser;
+use log::{info, Level};
 
 use plonky2::field::extension::Extendable;
 use plonky2::field::secp256k1_scalar::Secp256K1Scalar;
 use plonky2::hash::hash_types::RichField;
 use plonky2::plonk::circuit_builder::CircuitBuilder;
+use plonky2::plonk::config::GenericConfig;
+use plonky2::iop::witness::{PartialWitness, Witness};
+use plonky2_field::types::{PrimeField, Field, PrimeField64};
+use plonky2::util::timing::TimingTree;
+use plonky2::plonk::circuit_data::CircuitConfig;
 
 use crate::curve::curve_types::Curve;
 use crate::curve::secp256k1::Secp256K1;
@@ -18,22 +22,8 @@ use crate::gadgets::curve::{AffinePointTarget, CircuitBuilderCurve};
 use crate::gadgets::curve_fixed_base::fixed_base_curve_mul_circuit;
 use crate::gadgets::glv::CircuitBuilderGlv;
 use crate::gadgets::nonnative::{CircuitBuilderNonNative, NonNativeTarget};
-
-use plonky2::plonk::config::{GenericConfig, PoseidonGoldilocksConfig};
-use crate::curve::curve_types::CurveScalar;
 use crate::curve::ecdsa::{ECDSAPublicKey, ECDSASignature};
-use plonky2::plonk::circuit_data::{CircuitConfig, CommonCircuitData, VerifierCircuitTarget, VerifierOnlyCircuitData};
-use plonky2::plonk::proof::{CompressedProofWithPublicInputs, ProofWithPublicInputs};
-use plonky2::iop::witness::{PartialWitness, Witness};
-use plonky2::iop::target::Target;
-use plonky2_field::types::{PrimeField, Field, PrimeField64};
-use plonky2::util::timing::TimingTree;
-
-type ProofTuple<F, C, const D: usize> = (
-    ProofWithPublicInputs<F, C, D>,
-    VerifierOnlyCircuitData<C, D>,
-    CommonCircuitData<F, D>,
-);
+use crate::gadgets::recursive_proof::ProofTuple;
 
 pub trait RegisterNonNativePublicTarget<T: Field, F: RichField + Extendable<D>, const D: usize> {
     fn register_public_nonative_target(&self, builder: &mut CircuitBuilder<F, D>);
@@ -147,13 +137,8 @@ pub fn prove_ecdsa<F: RichField + Extendable<D>, C: GenericConfig<D, F = F>, con
     pk_target.set_ecdsa_pk_target(&mut pw, &pk);
     sig_target.set_ecdsa_signature_target(&mut pw, &sig);
 
-    // println!(
-    //     "Constructing inner proof with {} gates",
-    //     builder.num_gates()
-    // );
-
     info!(
-        "Constructing inner proof with {} gates",
+        "Constructing inner proof of `prove_ecdsa` with {} gates",
         builder.num_gates()
     );
 
