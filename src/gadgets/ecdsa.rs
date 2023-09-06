@@ -137,10 +137,15 @@ pub fn prove_ecdsa<F: RichField + Extendable<D>, C: GenericConfig<D, F = F>, con
     pk_target.set_ecdsa_pk_target(&mut pw, &pk);
     sig_target.set_ecdsa_signature_target(&mut pw, &sig);
 
-    info!(
+    println!(
         "Constructing inner proof of `prove_ecdsa` with {} gates",
         builder.num_gates()
     );
+
+    // info!(
+    //     "Constructing inner proof of `prove_ecdsa` with {} gates",
+    //     builder.num_gates()
+    // );
 
     let data = builder.build::<C>();
 
