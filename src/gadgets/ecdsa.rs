@@ -1,5 +1,5 @@
 #![allow(incomplete_features)]
-// #![feature(generic_const_exprs)]
+#![feature(generic_const_exprs)]
 
 use anyhow::Result;
 use core::marker::PhantomData;
@@ -236,7 +236,33 @@ mod tests {
 
         let sig = sign_message(msg, sk);
 
+        println!("message digest: {:?}", msg);
+        println!("sk: {:?}", sk);
+        println!("pk: {:?}", pk);
+        println!("signature: {:?}", sig);
+
         let ecdsa_proof = prove_ecdsa::<F, C, D>(msg, sig, pk).unwrap();
         println!("Num public inputs: {}", ecdsa_proof.2.num_public_inputs);
     }
+
+    #[test]
+    #[ignore]
+    fn test_failure_fake_pk() {
+        const D: usize = 2;
+        type C = PoseidonGoldilocksConfig;
+        type F = <C as GenericConfig<D>>::F;
+
+        type Curve = Secp256K1;
+
+        let msg = Secp256K1Scalar::rand();
+        let sk = ECDSASecretKey::<Curve>(Secp256K1Scalar::rand());
+
+        let sig = sign_message(msg, sk);
+
+        let fake_pk = ECDSAPublicKey((CurveScalar(Secp256K1Scalar::rand()) * Curve::GENERATOR_PROJECTIVE).to_affine());
+
+        let ecdsa_proof = prove_ecdsa::<F, C, D>(msg, sig, fake_pk).unwrap();
+        println!("Num public inputs: {}", ecdsa_proof.2.num_public_inputs);
+    }
+
 }

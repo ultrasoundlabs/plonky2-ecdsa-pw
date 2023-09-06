@@ -21,11 +21,14 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
     ```
 
 - run test
+    - succeed
 
-    ```sh
-    cargo test --release --package plonky2_ecdsa --lib -- gadgets::ecdsa::tests::test_ecdsa_circuit_wide --exact --nocapture --ignored
-    ```
+        ```sh
+        cargo test --release --package plonky2_ecdsa --lib -- gadgets::ecdsa::tests::test_prove_ecdsa --exact --nocapture --ignored
+        ```
 
-    ```sh
-    cargo test --release --package plonky2_ecdsa --lib -- gadgets::ecdsa::tests::test_prove_ecdsa --exact --nocapture --ignored
-    ```
+    - failure
+
+        ```sh
+        cargo test --release --package plonky2_ecdsa --lib -- gadgets::ecdsa::tests::test_failure_fake_pk --exact --nocapture --ignored
+        ```
