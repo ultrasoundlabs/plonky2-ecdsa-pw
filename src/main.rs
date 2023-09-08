@@ -17,10 +17,10 @@ use plonky2_ecdsa::curve::ecdsa::{sign_message, ECDSAPublicKey, ECDSASecretKey, 
 
 fn main() {
     // Initialize logging
-    let mut env_builder = env_logger::Builder::from_default_env();
-    env_builder.format_timestamp(None);
-    env_builder.filter_level(LevelFilter::Info);
-    env_builder.try_init().unwrap();
+    let mut log_builder = env_logger::Builder::from_default_env();
+    log_builder.format_timestamp(None);
+    log_builder.filter_level(LevelFilter::Info);
+    log_builder.try_init().unwrap();
 
     const D: usize = 2;
     type C = PoseidonGoldilocksConfig;
@@ -45,20 +45,20 @@ fn main() {
     let ecdsa_3 = sample_ecdsa();
 
     // The performance bottleneck is due to the proving of a single `ecdsa` verification, and there needs to be a multithread version of the below proving
-    println!("Prove single ecdsa starting...");
+    info!("Prove single ecdsa starting...");
     let timing = TimingTree::new("prove ecdsa 1, 2, and 3", Level::Info);
     let mut proofs = std::vec::Vec::new();
     proofs.push(prove_ecdsa::<F, C, D>(ecdsa_1.0, ecdsa_1.2, ecdsa_1.1).expect("prove error 1"));
     proofs.push(prove_ecdsa::<F, C, D>(ecdsa_2.0, ecdsa_2.2, ecdsa_2.1).expect("prove error 2"));
     proofs.push(prove_ecdsa::<F, C, D>(ecdsa_3.0, ecdsa_3.2, ecdsa_3.1).expect("prove error 3"));
     timing.print();
-    println!("Prove single ecdsa ended and start recursive proving...");
+    info!("Prove single ecdsa ended and start recursive proving...");
 
     // Recursively verify the proof
     let timing = TimingTree::new("Recursively verify the proof", Level::Info);
     let middle = recursive_proof::<F, C, C, D>(&proofs, &config, None).expect("prove recursive error!");
     let (_, _, cd) = &middle;
-    println!(
+    info!(
         "Single recursion proof degree {} = 2^{}",
         cd.degree(),
         cd.degree_bits()
@@ -70,7 +70,7 @@ fn main() {
     let final_proof_vec = std::vec![middle];
     let outer = recursive_proof::<F, C, C, D>(&final_proof_vec, &config, None).expect("prove final error!");
     let (_, _, cd) = &outer;
-    println!(
+    info!(
         "Double recursion proof degree {} = 2^{}",
         cd.degree(),
         cd.degree_bits()
