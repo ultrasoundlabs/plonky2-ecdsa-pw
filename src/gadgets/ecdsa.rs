@@ -23,7 +23,7 @@ use crate::gadgets::curve_fixed_base::fixed_base_curve_mul_circuit;
 use crate::gadgets::glv::CircuitBuilderGlv;
 use crate::gadgets::nonnative::{CircuitBuilderNonNative, NonNativeTarget};
 use crate::curve::ecdsa::{ECDSAPublicKey, ECDSASignature};
-use crate::gadgets::recursive_proof::{ProofTuple, recursive_proof};
+use crate::gadgets::recursive_proof::ProofTuple;
 
 pub trait RegisterNonNativePublicTarget<T: Field, F: RichField + Extendable<D>, const D: usize> {
     fn register_public_nonative_target(&self, builder: &mut CircuitBuilder<F, D>);
@@ -171,6 +171,8 @@ mod tests {
     use plonky2::plonk::circuit_data::CircuitConfig;
     use plonky2::plonk::config::{GenericConfig, PoseidonGoldilocksConfig};
     use plonky2_field::types::PrimeField;
+
+    use crate::gadgets::recursive_proof::recursive_proof;
 
     use super::*;
     use crate::curve::curve_types::CurveScalar;
@@ -333,6 +335,6 @@ mod tests {
             cd.degree_bits()
         );
 
-        }
+    }
 
 }
