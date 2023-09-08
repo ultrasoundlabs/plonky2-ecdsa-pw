@@ -32,3 +32,9 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
         ```sh
         cargo test --release --package plonky2_ecdsa --lib -- gadgets::ecdsa::tests::test_failure_fake_pk --exact --nocapture --ignored
         ```
+
+    - recursive
+
+        ```sh
+        cargo test --release --package plonky2_ecdsa --lib -- gadgets::ecdsa::tests::test_two_ecdsa_recursive --exact --nocapture --ignored
+        ```

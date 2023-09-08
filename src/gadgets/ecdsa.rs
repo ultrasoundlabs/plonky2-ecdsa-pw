@@ -1,5 +1,5 @@
 #![allow(incomplete_features)]
-#![feature(generic_const_exprs)]
+// #![feature(generic_const_exprs)]
 
 use anyhow::Result;
 use core::marker::PhantomData;
@@ -23,7 +23,7 @@ use crate::gadgets::curve_fixed_base::fixed_base_curve_mul_circuit;
 use crate::gadgets::glv::CircuitBuilderGlv;
 use crate::gadgets::nonnative::{CircuitBuilderNonNative, NonNativeTarget};
 use crate::curve::ecdsa::{ECDSAPublicKey, ECDSASignature};
-use crate::gadgets::recursive_proof::ProofTuple;
+use crate::gadgets::recursive_proof::{ProofTuple, recursive_proof};
 
 pub trait RegisterNonNativePublicTarget<T: Field, F: RichField + Extendable<D>, const D: usize> {
     fn register_public_nonative_target(&self, builder: &mut CircuitBuilder<F, D>);
@@ -137,15 +137,15 @@ pub fn prove_ecdsa<F: RichField + Extendable<D>, C: GenericConfig<D, F = F>, con
     pk_target.set_ecdsa_pk_target(&mut pw, &pk);
     sig_target.set_ecdsa_signature_target(&mut pw, &sig);
 
-    println!(
-        "Constructing inner proof of `prove_ecdsa` with {} gates",
-        builder.num_gates()
-    );
-
-    // info!(
+    // println!(
     //     "Constructing inner proof of `prove_ecdsa` with {} gates",
     //     builder.num_gates()
     // );
+
+    info!(
+        "Constructing inner proof of `prove_ecdsa` with {} gates",
+        builder.num_gates()
+    );
 
     let data = builder.build::<C>();
 
@@ -280,5 +280,59 @@ mod tests {
         let ecdsa_proof = prove_ecdsa::<F, C, D>(msg, sig, fake_pk).unwrap();
         println!("Num public inputs: {}", ecdsa_proof.2.num_public_inputs);
     }
+
+    #[test]
+    #[ignore]
+    fn test_two_ecdsa_recursive() {
+        const D: usize = 2;
+        type C = PoseidonGoldilocksConfig;
+        type F = <C as GenericConfig<D>>::F;
+
+        type Curve = Secp256K1;
+
+        fn sample_ecdsa() -> (Secp256K1Scalar, ECDSAPublicKey<Curve>, ECDSASignature<Curve>) {
+            let msg = Secp256K1Scalar::rand();
+            let sk = ECDSASecretKey::<Curve>(Secp256K1Scalar::rand());
+            let pk = ECDSAPublicKey((CurveScalar(sk.0) * Curve::GENERATOR_PROJECTIVE).to_affine());
+
+            let sig = sign_message(msg, sk);
+
+            (msg, pk, sig)
+        }
+
+        let config = CircuitConfig::standard_recursion_config();
+
+        let ecdsa_1 = sample_ecdsa();
+        let ecdsa_2 = sample_ecdsa();
+        let ecdsa_3 = sample_ecdsa();
+
+        // The performance bottleneck is due to the proving of a single `ecdsa` verification, and there needs to be a multithread version of the below proving
+        println!("Prove single ecdsa starting...");
+        let mut proofs = std::vec::Vec::new();
+        proofs.push(prove_ecdsa::<F, C, D>(ecdsa_1.0, ecdsa_1.2, ecdsa_1.1).expect("prove error 1"));
+        proofs.push(prove_ecdsa::<F, C, D>(ecdsa_2.0, ecdsa_2.2, ecdsa_2.1).expect("prove error 2"));
+        proofs.push(prove_ecdsa::<F, C, D>(ecdsa_3.0, ecdsa_3.2, ecdsa_3.1).expect("prove error 3"));
+        println!("Prove single ecdsa ended and start recursive proving...");
+
+        // Recursively verify the proof
+        let middle = recursive_proof::<F, C, C, D>(&proofs, &config, None).expect("prove recursive error!");
+        let (_, _, cd) = &middle;
+        println!(
+            "Single recursion proof degree {} = 2^{}",
+            cd.degree(),
+            cd.degree_bits()
+        );
+
+        // Add a second layer of recursion to shrink the proof size further
+        let final_proof_vec = std::vec![middle];
+        let outer = recursive_proof::<F, C, C, D>(&final_proof_vec, &config, None).expect("prove final error!");
+        let (_, _, cd) = &outer;
+        println!(
+            "Double recursion proof degree {} = 2^{}",
+            cd.degree(),
+            cd.degree_bits()
+        );
+
+        }
 
 }
