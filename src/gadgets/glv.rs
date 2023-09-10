@@ -109,7 +109,7 @@ struct GLVDecompositionGenerator<F: RichField + Extendable<D>, const D: usize> {
     _phantom: PhantomData<F>,
 }
 
-impl<F: RichField + Extendable<D>, const D: usize> SimpleGenerator<F>
+impl<F: RichField + Extendable<D>, const D: usize> SimpleGenerator<F, D>
     for GLVDecompositionGenerator<F, D>
 {
     fn dependencies(&self) -> Vec<Target> {

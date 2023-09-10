@@ -10,20 +10,13 @@ parallel = ["plonky2_maybe_rayon/parallel", "plonky2/parallel"]
 
 [dependencies]
 anyhow = { version = "1.0.40", default-features = false }
-
-itertools = { version = "0.10.0", default-features = false }
-plonky2_maybe_rayon = { version = "=0.1.0", default-features = false }
 num = { version = "0.4.0", default-features = false }
-plonky2 = { version = "=0.1.2" }
-plonky2_u32 = { version = "=0.1.0", default-features = false }
-plonky2_field = {version = "=0.1.0", default-features = false}
+itertools = { version = "0.10.0", default-features = false }
 
-# itertools = { version = "*", default-features = false }
-# plonky2_maybe_rayon = { version = "*", default-features = false }
-# num = { version = "*", default-features = false }
-# plonky2 = { version = "*", default-features = false }
-# plonky2_u32 = { version = "*", default-features = false }
-# plonky2_field = {version = "*", default-features = false}
+plonky2_u32 = { path = "../plonky2-u32" }
+plonky2_maybe_rayon = { path = "../plonky2/maybe_rayon" }
+plonky2 = { path = "../plonky2/plonky2" }
+plonky2_field = {path = "../plonky2/field" }
 
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 rand = { version = "0.8.4", default-features = false, features = ["getrandom"] }
