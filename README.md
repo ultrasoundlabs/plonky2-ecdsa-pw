@@ -51,7 +51,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 - package `nonnative`, `impl<F: RichField + Extendable<D>, const D: usize> CircuitBuilderNonNative<F, D>
     for CircuitBuilder<F, D>`, `mul_nonnative`
     - fix according to [PR-1](https://github.com/mir-protocol/plonky2-ecdsa/pull/1)
-    - [fix commit]()
+    - [fix commit](https://github.com/mir-protocol/plonky2-ecdsa/commit/dd03c7d5c156f026d6ba39b63d517b2d447fc6c9)
     - test script:
         ```sh
         cargo test --release --package plonky2_ecdsa --lib -- gadgets::nonnative::tests::test_overflow --exact --nocapture
