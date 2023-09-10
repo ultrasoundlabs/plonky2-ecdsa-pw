@@ -45,3 +45,14 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
         ```sh
         ./run.sh
         ```
+
+## Fixed
+
+- package `nonnative`, `impl<F: RichField + Extendable<D>, const D: usize> CircuitBuilderNonNative<F, D>
+    for CircuitBuilder<F, D>`, `mul_nonnative`
+    - fix according to [PR-1](https://github.com/mir-protocol/plonky2-ecdsa/pull/1)
+    - [fix commit]()
+    - test script:
+        ```sh
+        cargo test --release --package plonky2_ecdsa --lib -- gadgets::nonnative::tests::test_overflow --exact --nocapture
+        ```

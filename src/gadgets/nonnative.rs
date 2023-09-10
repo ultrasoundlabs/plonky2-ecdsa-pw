@@ -313,9 +313,15 @@ impl<F: RichField + Extendable<D>, const D: usize> CircuitBuilderNonNative<F, D>
     ) -> NonNativeTarget<FF> {
         let prod = self.add_virtual_nonnative_target::<FF>();
         let modulus = self.constant_biguint(&FF::order());
-        let overflow = self.add_virtual_biguint_target(
-            a.value.num_limbs() + b.value.num_limbs() - modulus.num_limbs(),
-        );
+        // let overflow = self.add_virtual_biguint_target(
+        //     a.value.num_limbs() + b.value.num_limbs() - modulus.num_limbs(),
+        // );
+        let mul_limbs = a.value.num_limbs() + b.value.num_limbs();
+        let mut overflow_limbs: usize = 1;
+        if mul_limbs > modulus.num_limbs() {
+            overflow_limbs = mul_limbs - modulus.num_limbs();
+        }
+        let overflow = self.add_virtual_biguint_target(overflow_limbs);
 
         self.add_simple_generator(NonNativeMultiplicationGenerator::<F, D, FF> {
             a: a.clone(),
@@ -823,4 +829,27 @@ mod tests {
         let proof = data.prove(pw).unwrap();
         data.verify(proof)
     }
+
+    #[test]
+    fn test_overflow() {
+        const D: usize = 2;
+        type C = PoseidonGoldilocksConfig;
+        type F = <C as GenericConfig<D>>::F;
+        let config = CircuitConfig::standard_ecc_config();
+
+        let pw = PartialWitness::<F>::new();
+        let mut builder = CircuitBuilder::<F, D>::new(config);
+
+        let a = Secp256K1Base::from_canonical_u32(1);
+        let b = Secp256K1Base::from_canonical_u32(2);
+
+        let a_t = builder.constant_nonnative(a);
+        let b_t = builder.constant_nonnative(b);
+        let _c_t = builder.mul_nonnative(&a_t, &b_t);
+
+        let data = builder.build::<C>();
+        let proof = data.prove(pw).unwrap();
+        data.verify(proof).unwrap();
+    }
+
 }
