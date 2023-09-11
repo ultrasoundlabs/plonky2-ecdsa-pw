@@ -11,7 +11,7 @@ parallel = ["plonky2_maybe_rayon/parallel", "plonky2/parallel"]
 [dependencies]
 anyhow = { version = "1.0.40", default-features = false }
 num = { version = "0.4.0", default-features = false }
-itertools = { version = "0.10.0", default-features = false }
+itertools = { version = "0.11.0", default-features = false }
 
 plonky2_u32 = { path = "../plonky2-u32" }
 plonky2_maybe_rayon = { path = "../plonky2/maybe_rayon" }
