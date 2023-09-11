@@ -12,6 +12,14 @@ at your option.
 
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.
 
+
+### Environment
+
+This branch use the newest version of the [plonky2](https://github.com/mir-protocol/plonky2). To build and test:  
+
+- Clone the updated [plonky2](https://github.com/mir-protocol/plonky2), [plonky2-u32](https://github.com/xiyu1984/plonky2-u32), and [plonky2-ecdsa](https://github.com/xiyu1984/plonky2-ecdsa/tree/development) to local, and put them in the same directory 
+- Use the `development` branch of `plonky2-ecdsa`
+
 ### Test
 
 - nightly
