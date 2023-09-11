@@ -36,7 +36,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
     - recursive
 
         ```sh
-        cargo test --release --package plonky2_ecdsa --lib -- gadgets::ecdsa::tests::test_two_ecdsa_recursive --exact --nocapture --ignored
+        cargo test --release --package plonky2_ecdsa --lib -- gadgets::ecdsa::tests::test_three_ecdsa_recursive --exact --nocapture --ignored
         ```
 
 - run exec

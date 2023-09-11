@@ -1,6 +1,5 @@
 use alloc::vec;
 use alloc::vec::Vec;
-use plonky2::util::serialization::IoError;
 use core::marker::PhantomData;
 
 use num::{BigUint, Integer, Zero};
@@ -8,6 +7,7 @@ use num::{BigUint, Integer, Zero};
 use plonky2_u32::gadgets::arithmetic_u32::{CircuitBuilderU32, U32Target};
 use plonky2_u32::gadgets::multiple_comparison::list_le_u32_circuit;
 use plonky2_u32::witness::{GeneratedValuesU32, WitnessU32};
+use plonky2_u32::serialization::{ReadU32, WriteU32};
 
 use plonky2::field::extension::Extendable;
 use plonky2::field::types::{PrimeField, PrimeField64};
@@ -17,7 +17,7 @@ use plonky2::iop::target::{BoolTarget, Target};
 use plonky2::iop::witness::{PartitionWitness, Witness};
 use plonky2::plonk::circuit_builder::CircuitBuilder;
 use plonky2::plonk::circuit_data::CommonCircuitData;
-use plonky2::util::serialization::{Buffer, IoResult};
+use plonky2::util::serialization::{Buffer, IoResult, Read, Write};
 
 
 #[derive(Clone, Debug)]
@@ -32,6 +32,37 @@ impl BigUintTarget {
 
     pub fn get_limb(&self, i: usize) -> U32Target {
         self.limbs[i]
+    }
+}
+
+pub trait ReadBigUintTarget {
+    fn read_target_big_uint(&mut self) -> IoResult<BigUintTarget>;
+}
+
+impl ReadBigUintTarget for Buffer<'_> {
+    fn read_target_big_uint(&mut self) -> IoResult<BigUintTarget> {
+        let lims_len = self.read_usize()?;
+        let mut res = Vec::with_capacity(lims_len);
+        for _ in 0..lims_len {
+            res.push(self.read_target_u32()?);
+        }
+
+        Ok(BigUintTarget { limbs: res })
+    }
+}
+
+pub trait WriteBigUintTarget {
+    fn write_target_big_uint(&mut self, x: BigUintTarget) -> IoResult<()>;
+}
+
+impl WriteBigUintTarget for Vec<u8> {
+    fn write_target_big_uint(&mut self, x: BigUintTarget) -> IoResult<()> {
+        self.write_usize(x.num_limbs())?;
+        for ele in &x.limbs {
+            self.write_target_u32(*ele)?;
+        }
+
+        Ok(())
     }
 }
 
@@ -353,15 +384,22 @@ impl<F: RichField + Extendable<D>, const D: usize> SimpleGenerator<F, D>
         out_buffer.set_biguint_target(&self.rem, &rem);
     }
 
-    fn serialize(&self, dst: &mut Vec<u8>, common_data: &CommonCircuitData<F, D>) -> IoResult<()> {
-        Err(IoError)
+    fn serialize(&self, dst: &mut Vec<u8>, _common_data: &CommonCircuitData<F, D>) -> IoResult<()> {
+        dst.write_target_big_uint(self.a.clone())?;
+        dst.write_target_big_uint(self.b.clone())?;
+        dst.write_target_big_uint(self.div.clone())?;
+        dst.write_target_big_uint(self.rem.clone())
     }
 
-    fn deserialize(src: &mut Buffer, common_data: &CommonCircuitData<F, D>) -> IoResult<Self>
+    fn deserialize(src: &mut Buffer, _common_data: &CommonCircuitData<F, D>) -> IoResult<Self>
     where
         Self: Sized
     {
-        Err(IoError)
+        let a = src.read_target_big_uint()?;
+        let b = src.read_target_big_uint()?;
+        let div = src.read_target_big_uint()?;
+        let rem = src.read_target_big_uint()?;
+        Ok(Self{a, b, div, rem, _phantom: PhantomData})
     }
 }
 

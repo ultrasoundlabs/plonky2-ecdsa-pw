@@ -285,7 +285,7 @@ mod tests {
 
     #[test]
     #[ignore]
-    fn test_two_ecdsa_recursive() {
+    fn test_three_ecdsa_recursive() {
         const D: usize = 2;
         type C = PoseidonGoldilocksConfig;
         type F = <C as GenericConfig<D>>::F;
