@@ -1,5 +1,5 @@
 use alloc::vec;
-use alloc::vec::Vec;
+// use alloc::vec::Vec;
 use core::iter::Sum;
 
 use plonky2::field::ops::Square;

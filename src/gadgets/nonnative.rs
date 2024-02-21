@@ -1,5 +1,5 @@
 use alloc::vec;
-use alloc::vec::Vec;
+// use alloc::vec::Vec;
 use core::marker::PhantomData;
 
 use num::{BigUint, Integer, One, Zero};
