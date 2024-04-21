@@ -12,6 +12,14 @@ at your option.
 
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.
 
+
+### Environment
+
+This branch use the newest version of the [plonky2](https://github.com/mir-protocol/plonky2). To build and test:  
+
+- Clone the updated [plonky2](https://github.com/mir-protocol/plonky2), [plonky2-u32](https://github.com/xiyu1984/plonky2-u32), and [plonky2-ecdsa](https://github.com/xiyu1984/plonky2-ecdsa/tree/development) to local, and put them in the same directory 
+- Use the `development` branch of `plonky2-ecdsa`
+
 ### Test
 
 - nightly
@@ -36,7 +44,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
     - recursive
 
         ```sh
-        cargo test --release --package plonky2_ecdsa --lib -- gadgets::ecdsa::tests::test_two_ecdsa_recursive --exact --nocapture --ignored
+        cargo test --release --package plonky2_ecdsa --lib -- gadgets::ecdsa::tests::test_three_ecdsa_recursive --exact --nocapture --ignored
         ```
 
 - run exec
@@ -45,7 +53,16 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
         ```sh
         ./run.sh
         ```
+## Fixed
 
+- package `nonnative`, `impl<F: RichField + Extendable<D>, const D: usize> CircuitBuilderNonNative<F, D>
+    for CircuitBuilder<F, D>`, `mul_nonnative`
+    - fix according to [PR-1](https://github.com/mir-protocol/plonky2-ecdsa/pull/1)
+    - [fix commit](https://github.com/mir-protocol/plonky2-ecdsa/commit/dd03c7d5c156f026d6ba39b63d517b2d447fc6c9)
+    - test script:
+        ```sh
+        cargo test --release --package plonky2_ecdsa --lib -- gadgets::nonnative::tests::test_overflow --exact --nocapture
+        ```
 ### Newest
 
 Go to branch `development` for the newest version.  
