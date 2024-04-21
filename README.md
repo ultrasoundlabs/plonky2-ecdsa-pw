@@ -53,7 +53,6 @@ This branch use the newest version of the [plonky2](https://github.com/mir-proto
         ```sh
         ./run.sh
         ```
-
 ## Fixed
 
 - package `nonnative`, `impl<F: RichField + Extendable<D>, const D: usize> CircuitBuilderNonNative<F, D>
@@ -64,3 +63,6 @@ This branch use the newest version of the [plonky2](https://github.com/mir-proto
         ```sh
         cargo test --release --package plonky2_ecdsa --lib -- gadgets::nonnative::tests::test_overflow --exact --nocapture
         ```
+### Newest
+
+Go to branch `development` for the newest version.  
