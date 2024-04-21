@@ -11,7 +11,7 @@ use plonky2::iop::target::{BoolTarget, Target};
 use plonky2::iop::witness::{PartitionWitness, WitnessWrite};
 use plonky2::plonk::circuit_builder::CircuitBuilder;
 use plonky2::plonk::circuit_data::CommonCircuitData;
-use plonky2::util::ceil_div_usize;
+// use plonky2::util::ceil_div_usize;
 use plonky2::util::serialization::{Buffer, IoResult, Read, Write};
 
 use plonky2_u32::gadgets::arithmetic_u32::{CircuitBuilderU32, U32Target};
@@ -52,7 +52,8 @@ impl <FF: Field> ReadNonNativeTarget<FF> for Buffer<'_> {
 
 pub trait CircuitBuilderNonNative<F: RichField + Extendable<D>, const D: usize> {
     fn num_nonnative_limbs<FF: Field>() -> usize {
-        ceil_div_usize(FF::BITS, 32)
+        // ceil_div_usize(FF::BITS, 32)
+        FF::BITS.div_ceil(32)
     }
 
     fn biguint_to_nonnative<FF: Field>(&mut self, x: &BigUintTarget) -> NonNativeTarget<FF>;
@@ -147,7 +148,8 @@ impl<F: RichField + Extendable<D>, const D: usize> CircuitBuilderNonNative<F, D>
     for CircuitBuilder<F, D>
 {
     fn num_nonnative_limbs<FF: Field>() -> usize {
-        ceil_div_usize(FF::BITS, 32)
+        // ceil_div_usize(FF::BITS, 32)
+        FF::BITS.div_ceil(32)
     }
 
     fn biguint_to_nonnative<FF: Field>(&mut self, x: &BigUintTarget) -> NonNativeTarget<FF> {
