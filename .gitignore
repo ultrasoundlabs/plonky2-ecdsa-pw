@@ -9,3 +9,6 @@ pgo-data.profdata
 # MacOS nuisances
 .DS_Store
 
+plonky2-ecdsa
+plonky2-u32
+plonky2
